@@ -1,0 +1,67 @@
+---
+title: "Comparision of the exponential distribution with the Central Limit Theorem"
+author: "Piotr Turski"
+date: '2015-09-20'
+output:
+  pdf_document: null
+  html_document: default
+fontsize: 10pt
+---
+## Overview
+
+This project runs simulations of exponential distribution, compares it with predictions of Central Limit Theorem. All the simulations use means of 40 samples and lambda = 0.2. All the simulations are using R language. 
+
+## Simulations
+
+Below you can see a distribution of the mean of 40 exponentials.
+```{r}
+set.seed(0)
+
+lambda <- 0.2
+sampleSize <- 40
+simulationsNumber <- 1000
+
+simulate <- function(n) {rowMeans(matrix(rexp(sampleSize * n, lambda), nrow=n))}
+
+means <- simulate(simulationsNumber)
+hist(means, breaks =50, freq = F, col = "grey")
+```
+
+## Sample mean vs Theoretical mean
+
+Theoretical mean is equal to the population mean:
+
+```{r}
+(sampleTheoreticalMean <- populationMean <- 1/lambda)
+```
+Actual sample mean is:
+
+```{r}
+mean(means)
+```
+## Sample variance vs Theoretical variance
+
+Theoretical variance is:
+```{r}
+populationSd <- 1/lambda
+populationVar <- populationSd^2
+(sampleTheoreticalVar <- populationVar/sampleSize)
+```
+Actual sample variance is:
+```{r}
+var(means)
+```
+## Aproximation of sample mean distribution
+To see that the distribution is approximately normal let's see how it changes with number of simulations. To better see the effect, each histogram contains theoretical normal distribution with marked mean.
+```{r}
+sampleTheoreticalSd <- sqrt(sampleTheoreticalVar)
+
+par(mfrow=c(2,2))
+for (n in 10^(1:4)) {
+  hist(simulate(n), freq = F, breaks=50,
+           col = "grey", main = paste (n, 'simulations'), xlab = 'means')
+  curve(dnorm(x, mean=sampleTheoreticalMean, sd=sampleTheoreticalSd),
+           col = 'red', add = TRUE, lwd=2)
+  abline(v=sampleTheoreticalMean, col="red", lwd=2)
+}
+```
