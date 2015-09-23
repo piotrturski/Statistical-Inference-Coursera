@@ -1,0 +1,85 @@
+---
+title: "Inferential analysis of ToothGrowth dataset"
+author: "Piotr Turski"
+date: "September 23, 2015"
+output: pdf_document
+---
+
+## Overview
+
+This document shows analysis of ToothGrowth dataset version `r packageVersion('datasets')` provided by R.
+
+## Exploratory data analyses
+
+
+```{r}
+data(ToothGrowth)
+str(ToothGrowth)
+```
+
+According to `?ToothGrowth`, dataset content:
+"The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid)". Newer version's (3.3.0) description says that ascorbic acid is coded as VC. 
+
+A plot suggested in the documentation helps to understand the data:
+```{r , fig.height = 4}
+coplot(len ~ dose | supp, data = ToothGrowth, panel = panel.smooth,
+       xlab = "ToothGrowth data: length vs dose, given type of supplement")
+```
+
+## Compare tooth growth by supp and dose
+
+Let's do `t.test` to compare: supplement types, dosage, supplement type per each dose 
+
+### Compare supplement type
+```{r}
+t.test(len ~ supp, data = ToothGrowth)
+```
+
+Confidence interval contains 0 so we cannot reject null hypothesis that supplement type doesn't matter.
+
+### Compare dosage
+
+```{r message=F}
+library(dplyr)
+t.test(len ~ dose, data = filter(ToothGrowth, dose != 2))
+```
+
+Confidence interval doesn't contain 0 so we reject null hypothesis that dose 0.5mg vs 1mg doesn't matter. Mean length for dose 1mg is greater.
+
+```{r}
+t.test(len ~ dose, data = filter(ToothGrowth, dose != 0.5))
+```
+
+Similary, dose 2mg gives larger length mean than dose 1mg.
+
+### Compare supplement type per dosage
+
+```{r}
+t.test(len ~ supp, data = filter(ToothGrowth, dose == 0.5))
+```
+
+Confidence interval doesn't contain 0 so we reject null hypothesis that supplement type for dose 0.5mg doesn't matter. Mean length for dose 1mg is greater for orange juice.
+
+```{r}
+t.test(len ~ supp, data = filter(ToothGrowth, dose == 1))
+```
+
+Confidence interval doesn't contain 0 so we reject null hypothesis that supplement type for dose 1mg doesn't matter. Mean length for dose 1mg is greater for orange juice.
+
+```{r}
+t.test(len ~ supp, data = filter(ToothGrowth, dose == 2))
+```
+
+Confidence interval contains 0 so we cannot reject null hypothesis that supplement type for dose 2mg doesn't matter.
+
+## Conclusions
+
+* Tooth length increases with dose.
+* For doses 0,5mg and 1mg orange juice causes greater tooth length than ascorbic acid.
+* For dose 2mg and irrespective of the dose, supplement type doesn't matter.
+
+## Assumptions
+
+* Distribution of means is approximately normal
+* Samples are random and independent
+* Tested animals are representative for the whole population
